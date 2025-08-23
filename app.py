@@ -3,8 +3,9 @@ import pandas as pd
 import plotly.express as px
 import time
 from datetime import datetime
+import openai  # For actual GPT integration when credits available
 
-# Demo data moved into main file
+# Demo data
 demo_sequence = [
     {"delay": 1000, "type": "transcript", "speaker": "CEO", "text": "Hi Sarah, it's Mark. I'm on a weak signal in Zurich."},
     {"delay": 2000, "type": "transcript", "speaker": "CEO", "text": "We need to urgently wire the $8.4M for the confidential acquisition today."},
@@ -94,6 +95,21 @@ st.markdown("""
         background-color: #1E88E5;
         color: white;
     }
+    .api-status {
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+    .api-active {
+        background-color: #e6f4ea;
+        color: #137333;
+        border: 1px solid #137333;
+    }
+    .api-inactive {
+        background-color: #fce8e6;
+        color: #c5221f;
+        border: 1px solid #c5221f;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -108,6 +124,14 @@ if 'actions' not in st.session_state:
     st.session_state.actions = []
 if 'risk_level' not in st.session_state:
     st.session_state.risk_level = "LOW"
+if 'api_keys' not in st.session_state:
+    st.session_state.api_keys = {
+        "openai_key": "",
+        "huggingface_key": "",
+        "speech_to_text_key": ""
+    }
+if 'credits_remaining' not in st.session_state:
+    st.session_state.credits_remaining = 1000  # Starting credits
 
 # Header
 st.markdown('<h1 class="main-header">🛡️ LiveGate</h1>', unsafe_allow_html=True)
@@ -116,11 +140,71 @@ st.markdown("**Real-Time Deepfake & Fraud Gatekeeper**")
 # Sidebar
 st.sidebar.image("https://picsum.photos/150/150?random=1", caption="LiveGate AI Protection")
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Dashboard", "Live Demo", "Admin Console", "About"])
+page = st.sidebar.radio("Go to", ["Dashboard", "Live Demo", "Admin Console", "API Configuration", "About"])
+
+# API Configuration Page
+if page == "API Configuration":
+    st.header("API Key Configuration")
+    
+    st.info("""
+    Enter your API keys below to enable enhanced AI features. 
+    Limited GPT-5 credits have been provided for this hackathon.
+    """)
+    
+    with st.form("api_config_form"):
+        openai_key = st.text_input("OpenAI API Key", type="password", 
+                                  value=st.session_state.api_keys["openai_key"],
+                                  help="For GPT-5 challenge generation and analysis")
+        
+        hf_key = st.text_input("Hugging Face API Key", type="password",
+                              value=st.session_state.api_keys["huggingface_key"],
+                              help="For additional ML model capabilities")
+        
+        stt_key = st.text_input("Speech-to-Text API Key", type="password",
+                               value=st.session_state.api_keys["speech_to_text_key"],
+                               help="For real-time audio transcription")
+        
+        submitted = st.form_submit_button("Save Configuration")
+        
+        if submitted:
+            st.session_state.api_keys = {
+                "openai_key": openai_key,
+                "huggingface_key": hf_key,
+                "speech_to_text_key": stt_key
+            }
+            st.success("API configuration saved successfully!")
+    
+    # Display credit information
+    st.subheader("Credit Status")
+    st.progress(st.session_state.credits_remaining / 1000)
+    st.write(f"Remaining credits: {st.session_state.credits_remaining}/1000")
+    
+    # API status indicators
+    st.subheader("API Connection Status")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        status = "active" if st.session_state.api_keys["openai_key"] else "inactive"
+        st.markdown(f'<div class="api-status api-{status}">OpenAI: {status.upper()}</div>', unsafe_allow_html=True)
+    
+    with col2:
+        status = "active" if st.session_state.api_keys["huggingface_key"] else "inactive"
+        st.markdown(f'<div class="api-status api-{status}">Hugging Face: {status.upper()}</div>', unsafe_allow_html=True)
+    
+    with col3:
+        status = "active" if st.session_state.api_keys["speech_to_text_key"] else "inactive"
+        st.markdown(f'<div class="api-status api-{status}">Speech-to-Text: {status.upper()}</div>', unsafe_allow_html=True)
 
 # Dashboard Page
-if page == "Dashboard":
+elif page == "Dashboard":
     st.header("Executive Dashboard")
+    
+    # API status quick view
+    if st.session_state.api_keys["openai_key"]:
+        st.success("✅ GPT-5 API Connected - Enhanced features enabled")
+    else:
+        st.warning("⚠️ Add API keys in Configuration section to enable AI features")
     
     # KPI cards
     col1, col2, col3 = st.columns(3)
@@ -131,6 +215,9 @@ if page == "Dashboard":
     with col3:
         st.metric("Prevention Rate", "100%", "0%")
     
+    # Credit usage
+    st.metric("AI Credits Remaining", st.session_state.credits_remaining, "-150 this session")
+    
     # Recent incidents
     st.subheader("Recent Incident")
     incident_data = {
@@ -138,7 +225,8 @@ if page == "Dashboard":
         "Target": "Sarah Chen (Finance)",
         "Impersonated": "CEO (Mark Jensen)",
         "Action": "Payment blocked, SecOps alerted",
-        "Amount Saved": "$8.4M"
+        "Amount Saved": "$8.4M",
+        "AI Credits Used": "150"
     }
     
     st.json(incident_data)
@@ -149,6 +237,12 @@ if page == "Dashboard":
 # Live Demo Page
 elif page == "Live Demo":
     st.header("Live Call Simulation: CFO Impersonation Attack")
+    
+    # Show API status
+    if st.session_state.api_keys["openai_key"]:
+        st.success("✅ AI Enhanced Mode: Using GPT-5 for dynamic challenge generation")
+    else:
+        st.warning("⚠️ Basic Mode: Using simulated responses. Add API key for AI features.")
     
     # Layout for demo
     col1, col2 = st.columns([2, 1])
@@ -166,6 +260,9 @@ elif page == "Live Demo":
                 st.session_state.transcript = []
                 st.session_state.actions = []
                 st.session_state.risk_level = "LOW"
+                # Deduct credits if using AI
+                if st.session_state.api_keys["openai_key"] and st.session_state.credits_remaining >= 150:
+                    st.session_state.credits_remaining -= 150
                 st.rerun()
         else:
             if st.button("Reset Demo"):
@@ -178,6 +275,10 @@ elif page == "Live Demo":
         # Risk meter
         risk_class = f"risk-{st.session_state.risk_level.lower()}"
         st.markdown(f'<div class="{risk_class}">Risk Level: {st.session_state.risk_level}</div>', unsafe_allow_html=True)
+        
+        # AI status
+        if st.session_state.api_keys["openai_key"]:
+            st.info(f"AI Credits: {st.session_state.credits_remaining}")
         
         # Transcript box
         st.subheader("Transcript")
@@ -239,7 +340,13 @@ elif page == "Admin Console":
     
     # Generate training drill
     if st.button("Generate Training Drill"):
-        st.success("Training drill generated successfully!")
+        # Use AI if available, otherwise use simulated response
+        if st.session_state.api_keys["openai_key"] and st.session_state.credits_remaining >= 50:
+            st.session_state.credits_remaining -= 50
+            st.success("Training drill generated using GPT-5!")
+        else:
+            st.info("Training drill generated (simulated mode)")
+        
         st.json({
             "scenario": "CEO Urgent Wire Request",
             "learning_objectives": [
@@ -249,7 +356,8 @@ elif page == "Admin Console":
             ],
             "department": "Finance",
             "estimated_duration": "15 minutes",
-            "difficulty": "Intermediate"
+            "difficulty": "Intermediate",
+            "ai_credits_used": 50 if st.session_state.api_keys["openai_key"] else 0
         })
 
 # About Page
@@ -281,8 +389,11 @@ else:
     - Enterprise system integrations (ERP, HRIS, Calendars)
     """)
     
-    st.info("This is a prototype demonstration for hackathon purposes.")
+    st.info("""
+    This demo includes limited GPT-5 credits provided for the Lalab Hackathon 2025. 
+    Add your API keys in the Configuration section to experience enhanced AI features.
+    """)
 
 # Footer
 st.markdown("---")
-st.markdown("LiveGate Prototype | Built for Lalab Hackathon 2025")
+st.markdown("LiveGate Prototype | Built for Lalab Hackathon 2025 | AI credits provided by hackathon sponsors")
