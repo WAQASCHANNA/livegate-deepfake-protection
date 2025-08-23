@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import time
 from datetime import datetime
-import openai  # For actual GPT integration when credits available
 
 # Demo data
 demo_sequence = [
