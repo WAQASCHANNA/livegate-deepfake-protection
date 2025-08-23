@@ -4,3 +4,4 @@ aiortc
 plotly
 pandas
 python-dotenv
+openai
