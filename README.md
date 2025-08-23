@@ -1,9 +1,6 @@
 🛡️ LiveGate - Real-Time Deepfake & Fraud Gatekeeper
 LiveGate is a GPT-5 powered security copilot that joins high-value video calls to detect and prevent deepfake impersonation attacks in real-time. It uses dynamic proof-of-life challenges and policy enforcement to stop fraud before money moves.
 
-🚀 Demo
-Try our live demo on Hugging Face Spaces:
-https://img.shields.io/badge/%F0%9F%A4%97%2520Hugging%2520Face-Spaces-blue
 
 📖 Overview
 Deepfake-driven fraud has become a board-level risk in 2025, with attackers using AI-generated voices and video to impersonate executives and trigger fraudulent payments. LiveGate prevents these attacks during the critical live interaction window by:
