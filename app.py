@@ -3,6 +3,13 @@ import pandas as pd
 import plotly.express as px
 import time
 from datetime import datetime
+import base64
+
+# Function to encode local image to base64
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
 
 # Demo data
 demo_sequence = [
@@ -137,7 +144,14 @@ st.markdown('<h1 class="main-header">🛡️ LiveGate</h1>', unsafe_allow_html=T
 st.markdown("**Real-Time Deepfake & Fraud Gatekeeper**")
 
 # Sidebar
-st.sidebar.image("https://picsum.photos/150/150?random=1", caption="LiveGate AI Protection")
+# Use your custom image instead of the random placeholder
+try:
+    # This will work if the image is in the assets folder
+    st.sidebar.image("assets/Gemini_Generated_Image_h7krmvh7krmvh7kr.png", caption="LiveGate AI Protection")
+except:
+    # Fallback to a placeholder if the image isn't found
+    st.sidebar.image("https://picsum.photos/150/150?random=1", caption="LiveGate AI Protection")
+
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Dashboard", "Live Demo", "Admin Console", "API Configuration", "About"])
 
@@ -248,8 +262,11 @@ elif page == "Live Demo":
     
     with col1:
         st.subheader("Live Call")
-        # Placeholder for video
-        st.image("https://picsum.photos/600/400?random=1", caption="Deepfake Video of CEO")
+        # Use your custom image for the video placeholder
+        try:
+            st.image("assets/Gemini_Generated_Image_h7krmvh7krmvh7kr.png", caption="Deepfake Video of CEO")
+        except:
+            st.image("https://picsum.photos/600/400?random=1", caption="Deepfake Video of CEO")
         
         # Demo controls
         if not st.session_state.demo_running:
